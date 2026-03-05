@@ -26,16 +26,12 @@ def test_health_endpoint():
     assert "model_loaded" in data
     assert "api_version" in data
 
+@pytest.mark.skipif(not model_service.is_loaded(), reason="Модель не загружена в CI")
 def test_predict_endpoint_invalid_data():
     """
     Проверяет эндпоинт предсказания с некорректными данными.
-    В CI-окружении без модели тест пропускается.
+    Тест автоматически пропускается, если модель не загружена.
     """
-    # Если модель не загружена — пропускаем тест
-    if not model_service.is_loaded():
-        pytest.skip("Модель не загружена в CI, пропускаем тест")
-        return
-    
     response = client.post("/predict", json={"features": []})
     # 422 - ошибка валидации Pydantic, 400 - если сервис сам возвращает 400
     assert response.status_code in [400, 422]
@@ -45,15 +41,12 @@ def test_predict_endpoint_no_data():
     response = client.post("/predict", json={})
     assert response.status_code == 422  # 422 - ошибка валидации Pydantic
 
+@pytest.mark.skipif(not model_service.is_loaded(), reason="Модель не загружена в CI")
 def test_predict_endpoint_valid_data():
     """
     Проверяет эндпоинт предсказания с корректными данными.
-    В CI-окружении без модели тест пропускается.
+    Тест автоматически пропускается, если модель не загружена.
     """
-    if not model_service.is_loaded():
-        pytest.skip("Модель не загружена в CI, пропускаем тест")
-        return
-    
     # Создаём список из 19 признаков (как ожидает модель)
     features = [float(i) for i in range(1, 20)]
     response = client.post("/predict", json={"features": features})
