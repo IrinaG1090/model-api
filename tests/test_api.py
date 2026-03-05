@@ -26,27 +26,23 @@ def test_health_endpoint():
 def test_predict_endpoint_invalid_data():
     """
     Проверяет эндпоинт предсказания с некорректными данными.
-    Если модель не загружена, тест должен пропускаться.
+    Если модель не загружена, тест пропускается.
     """
-    # Проверяем загрузку модели и пропускаем тест, если модель не загружена
     if not model_service.is_loaded():
         pytest.skip("Модель не загружена в CI, пропускаем тест")
-        return  # явный выход
+        return
     
-    # Если модель загружена, выполняем тест
     response = client.post("/predict", json={"features": []})
-    # Ожидаем 400 или 422, но не 500
     assert response.status_code in [400, 422]
 
 def test_predict_endpoint_no_data():
-    """Проверяет эндпоинт предсказания без данных"""
     response = client.post("/predict", json={})
     assert response.status_code == 422
 
 def test_predict_endpoint_valid_data():
     """
     Проверяет эндпоинт предсказания с корректными данными.
-    Если модель не загружена, тест должен пропускаться.
+    Если модель не загружена, тест пропускается.
     """
     if not model_service.is_loaded():
         pytest.skip("Модель не загружена в CI, пропускаем тест")
