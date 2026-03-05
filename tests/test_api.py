@@ -29,15 +29,15 @@ def test_health_endpoint():
 def test_predict_endpoint_invalid_data():
     """
     Проверяет эндпоинт предсказания с некорректными данными.
-    Динамически пропускается, если модель не загружена.
+    Пропускается динамически, если модель не загружена.
     """
-    # проверка внутри тела теста
+    # Единственно правильный способ для runtime-условий [citation:2][citation:7]
     if not model_service.is_loaded():
         pytest.skip("Модель не загружена в CI, пропускаем тест")
-        return  # exit гарантирует, что код ниже не выполнится
+        return  # обязательный return, чтобы код ниже не выполнялся [citation:7]
     
     response = client.post("/predict", json={"features": []})
-    # 422 - ошибка валидации Pydantic
+    # 422 - ошибка валидации Pydantic, 400 - если сервис сам возвращает 400
     assert response.status_code in [400, 422]
 
 def test_predict_endpoint_no_data():
@@ -48,7 +48,7 @@ def test_predict_endpoint_no_data():
 def test_predict_endpoint_valid_data():
     """
     Проверяет эндпоинт предсказания с корректными данными.
-    Динамически пропускается, если модель не загружена.
+    Пропускается динамически, если модель не загружена.
     """
     if not model_service.is_loaded():
         pytest.skip("Модель не загружена в CI, пропускаем тест")
