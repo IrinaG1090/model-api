@@ -1,4 +1,3 @@
-# app/services.py
 import joblib
 import numpy as np
 from pathlib import Path
@@ -61,9 +60,23 @@ class ModelService:
         if not self.is_loaded():
             raise RuntimeError("Модель не загружена")
         
+        # Валидация входных данных
+        if not features:
+            raise ValueError("Список признаков не может быть пустым")
+        
+        # Проверка типа данных
+        try:
+            features_float = [float(f) for f in features]
+        except (TypeError, ValueError) as e:
+            raise ValueError(f"Все признаки должны быть числами: {e}")
+        
         try:
             # Преобразуем входные данные в numpy массив
-            X = np.array(features).reshape(1, -1)
+            X = np.array(features_float).reshape(1, -1)
+            
+            # Дополнительная проверка размерности
+            if self.feature_cols and X.shape[1] != len(self.feature_cols):
+                raise ValueError(f"Ожидалось {len(self.feature_cols)} признаков, получено {X.shape[1]}")
             
             # Делаем предсказание
             prediction = self.model.predict(X)[0]

@@ -66,20 +66,10 @@ async def health_check():
         api_version=API_VERSION
     )
 
-@app.post("/predict",
-          response_model=PredictionResponse,
-          responses={
-              400: {"model": ErrorResponse},
-              500: {"model": ErrorResponse}
-          },
-          summary="Получить предсказание")
+@app.post("/predict", response_model=PredictionResponse)
 async def predict(request: PredictionRequest):
     """
     Эндпоинт для получения предсказания от модели.
-    
-    - **features**: список числовых признаков (обязательно)
-    
-    Возвращает предсказанное значение и метаданные.
     """
     if not model_service.is_loaded():
         raise HTTPException(
@@ -97,14 +87,22 @@ async def predict(request: PredictionRequest):
         )
         
     except ValueError as e:
+        # Ошибка валидации входных данных - возвращаем 400
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Ошибка в данных: {e}"
         )
-    except Exception as e:
+    except RuntimeError as e:
+        # Внутренняя ошибка сервиса - возвращаем 500
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Внутренняя ошибка сервера: {e}"
+        )
+    except Exception as e:
+        # Любая другая ошибка
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Неизвестная ошибка: {e}"
         )
 
 @app.get("/model-info",
