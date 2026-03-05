@@ -31,7 +31,7 @@ def test_predict_endpoint_invalid_data():
     if not model_service.is_loaded():
         pytest.skip("Модель не загружена в CI, пропускаем тест")
         return
-    
+
     response = client.post("/predict", json={"features": []})
     assert response.status_code in [400, 422]
 
@@ -47,7 +47,7 @@ def test_predict_endpoint_valid_data():
     if not model_service.is_loaded():
         pytest.skip("Модель не загружена в CI, пропускаем тест")
         return
-    
+
     features = [float(i) for i in range(1, 20)]
     response = client.post("/predict", json={"features": features})
     assert response.status_code == 200
